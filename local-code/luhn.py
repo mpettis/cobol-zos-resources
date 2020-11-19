@@ -23,7 +23,9 @@ def luhn(card_number):
 
 
 luhn("0000000001004993")
-luhn("000000000100499")
+luhn("0000000000012355")
+luhn("0000000000017349")
+luhn("000000000001733")
 luhn("000000000100496")
 
 #A little code to test it out on a number
