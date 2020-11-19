@@ -13,23 +13,23 @@
        FILE SECTION.
        FD  PRT-OUT RECORD CONTAINS 80 CHARACTERS RECORDING MODE F.
        01  PRT-REC-OUT.
-           05  FIRST-NAME   PIC X(11)        VALUE SPACES.
-           05               PIC X(1)         VALUE SPACES.
-           05  LAST-NAME    PIC X(22)        VALUE SPACES.
-           05               PIC X(1)         VALUE SPACES.
-           05  PRT-BAL      PIC Z,ZZZ,ZZZ    VALUE SPACES.
-           05               PIC X(36)        VALUE SPACES.
+           05  FIRST-NAME-OUT PIC X(11)        VALUE SPACES.
+           05                 PIC X(1)         VALUE SPACES.
+           05  LAST-NAME-OUT  PIC X(22)        VALUE SPACES.
+           05                 PIC X(1)         VALUE SPACES.
+           05  BAL-OUT        PIC Z,ZZZ,ZZZ    VALUE SPACES.
+           05                 PIC X(36)        VALUE SPACES.
       *
        FD  CUS-RECS RECORD CONTAINS 80 CHARACTERS RECORDING MODE F.
        01  IN-REC.
-           05  FIRST-NAME   PIC X(11).
-           05  LAST-NAME    PIC X(22).
-           05  START-DATE   PIC X(8).
-           05               PIC X(3).
-           05  END-DATE     PIC X(8).
-           05               PIC X(9).
-           05  BAL-CHAR     PIC X(12).
-           05               PIC X(7).
+           05  FIRST-NAME-IN  PIC X(11).
+           05  LAST-NAME-IN   PIC X(22).
+           05  START-DATE-IN  PIC X(8).
+           05                 PIC X(3).
+           05  END-DATE-IN    PIC X(8).
+           05                 PIC X(9).
+           05  BAL-IN         PIC X(12).
+           05                 PIC X(7).
       *
        
        WORKING-STORAGE SECTION.
@@ -43,7 +43,7 @@
 
        01  REFMOD-TIME-ITEM PIC X(8).
 
-       01  ACC-BAL          PIC 9(09)V99.
+       01  WS-ACC-BAL          PIC 9(09)V99.
 
        01  FLAGS.
            05 LASTREC       PIC X VALUE SPACE.
@@ -66,6 +66,8 @@
            05 YEAR-2      PIC 9999.
            05             PIC X(40) VALUE SPACES.
 
+       01  HEADER-3.
+           05             PIC X(80) VALUE ALL "=".
 
       ****************************************************************
       *                  PROCEDURE DIVISION                          *
@@ -86,8 +88,29 @@
            MOVE WS-CURRENT-MONTH TO MONTH-2.
            MOVE WS-CURRENT-DAY   TO DAY-2.
            WRITE PRT-REC-OUT FROM HEADER-2.
+           WRITE PRT-REC-OUT FROM HEADER-3.
+
+       A020-WRITE-ROWS.
+           PERFORM READ-RECORD.
+           PERFORM UNTIL LASTREC = 'Y'
+               MOVE SPACES TO PRT-REC-OUT
+               MOVE FIRST-NAME-IN TO FIRST-NAME-OUT
+               MOVE LAST-NAME-IN TO LAST-NAME-OUT
+               COMPUTE WS-ACC-BAL = FUNCTION NUMVAL-C(BAL-IN)
+               MOVE WS-ACC-BAL TO BAL-OUT
+               IF WS-ACC-BAL > 8000000
+                   WRITE PRT-REC-OUT
+               END-IF
+               PERFORM READ-RECORD
+               END-PERFORM.
 
        CLOSE-STOP.
            CLOSE PRT-OUT.
            CLOSE CUS-RECS.
            STOP RUN.
+
+       READ-RECORD.
+           READ CUS-RECS
+               AT END MOVE 'Y' TO LASTREC
+           END-READ.
+
