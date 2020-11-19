@@ -48,14 +48,23 @@
        01  FLAGS.
            05 LASTREC       PIC X VALUE SPACE.
 
+       01 WS-CURRENT-DATE.
+          05  WS-CURRENT-YEAR         PIC X(04).
+          05  WS-CURRENT-MONTH        PIC X(02).
+          05  WS-CURRENT-DAY          PIC X(02).
+
        01  HEADER-1.
            05 TITLE-1       PIC X(80) VALUE SPACE.
 
        01  HEADER-2.
            05 PREAMBLE-2  PIC X(27) VALUE "PREPARED FOR PAT STANARD ON".
-           05 SPACE1-2    PIC X(1)  VALUE SPACES.
-           05 YYYYMMDD-2  PIC 9(8).
-           05 SPACE2-2    PIC X(44) VALUE SPACES.
+           05             PIC X(1)  VALUE SPACES.
+           05 MONTH-2     PIC Z9.
+           05             PIC X(1) VALUE ".".
+           05 DAY-2       PIC Z9.
+           05             PIC X(1) VALUE ".".
+           05 YEAR-2      PIC 9999.
+           05             PIC X(40) VALUE SPACES.
 
 
       ****************************************************************
@@ -72,7 +81,10 @@
            MOVE "REPORT OF TOP ACCOUNT BALANCE HOLDERS" TO TITLE-1.
            WRITE PRT-REC-OUT FROM HEADER-1.
            MOVE SPACES TO PRT-REC-OUT.
-           MOVE FUNCTION CURRENT-DATE(1:8) TO YYYYMMDD-2.
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-CURRENT-DATE.
+           MOVE WS-CURRENT-YEAR  TO YEAR-2.
+           MOVE WS-CURRENT-MONTH TO MONTH-2.
+           MOVE WS-CURRENT-DAY   TO DAY-2.
            WRITE PRT-REC-OUT FROM HEADER-2.
 
        CLOSE-STOP.
