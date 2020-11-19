@@ -7,21 +7,18 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT CUS-RECS ASSIGN TO CUSTRECS.
-           SELECT PRT-DONE ASSIGN TO PRTDONE.
+           SELECT PRT-OUT ASSIGN TO PRTDONE.
 
        DATA DIVISION.
        FILE SECTION.
-       FD  PRT-DONE RECORD CONTAINS 25 CHARACTERS RECORDING MODE F.
-       01  PRT-REC-DONE.
-      *    05  PRT-DATE     PIC X(8)         VALUE SPACES.
-      *    05  FILLER       PIC X(1)         VALUE SPACES.
-      *    05  PRT-TIME     PIC X(4)         VALUE SPACES.
-      *    05  FILLER       PIC X(2)         VALUE SPACES.
-      *    05  PRT-COMMENT  PIC X(27)        VALUE SPACES.
-      *    05  FILLER       PIC X(2)         VALUE SPACES.
-           05  PRT-MY-NAME  PIC X(11)        VALUE SPACES.
-           05  FILLER       PIC X(2)         VALUE SPACES.
-           05  PRT-BAL      PIC Z,ZZZ,ZZZ.99 VALUE SPACES.
+       FD  PRT-OUT RECORD CONTAINS 80 CHARACTERS RECORDING MODE F.
+       01  PRT-REC-OUT.
+           05  FIRST-NAME   PIC X(11)        VALUE SPACES.
+           05               PIC X(1)         VALUE SPACES.
+           05  LAST-NAME    PIC X(22)        VALUE SPACES.
+           05               PIC X(1)         VALUE SPACES.
+           05  PRT-BAL      PIC Z,ZZZ,ZZZ    VALUE SPACES.
+           05               PIC X(36)        VALUE SPACES.
       *
        FD  CUS-RECS RECORD CONTAINS 80 CHARACTERS RECORDING MODE F.
        01  IN-REC.
@@ -48,33 +45,37 @@
 
        01  ACC-BAL          PIC 9(09)V99.
 
+       01  FLAGS.
+           05 LASTREC       PIC X VALUE SPACE.
+
+       01  HEADER-1.
+           05 TITLE-1       PIC X(80) VALUE SPACE.
+
+       01  HEADER-2.
+           05 PREAMBLE-2  PIC X(27) VALUE "PREPARED FOR PAT STANARD ON".
+           05 SPACE1-2    PIC X(1)  VALUE SPACES.
+           05 YYYYMMDD-2  PIC 9(8).
+           05 SPACE2-2    PIC X(44) VALUE SPACES.
+
+
       ****************************************************************
       *                  PROCEDURE DIVISION                          *
       ****************************************************************
        PROCEDURE DIVISION.
       *
        A000-START.
-      *    OPEN OUTPUT PRT-DONE.
-      *    MOVE SPACES TO PRT-REC-DONE.
-      *    MOVE "Matt Pettis" TO PRT-MY-NAME.
-      *    WRITE PRT-REC-DONE.
-      *    CLOSE PRT-DONE.
-           OPEN OUTPUT PRT-DONE.
+           OPEN OUTPUT PRT-OUT.
            OPEN INPUT CUS-RECS.
 
-           READ CUS-RECS.
+       A010-WRITE-HEADERS.
+           MOVE SPACES TO PRT-REC-OUT.
+           MOVE "REPORT OF TOP ACCOUNT BALANCE HOLDERS" TO TITLE-1.
+           WRITE PRT-REC-OUT FROM HEADER-1.
+           MOVE SPACES TO PRT-REC-OUT.
+           MOVE FUNCTION CURRENT-DATE(1:8) TO YYYYMMDD-2.
+           WRITE PRT-REC-OUT FROM HEADER-2.
 
-           MOVE SPACES TO PRT-REC-DONE.
-      *    MOVE "Matt Pettis" TO PRT-MY-NAME.
-           MOVE FIRST-NAME TO PRT-MY-NAME.
-      *    MOVE 1234567.89 TO PRT-BAL.
-      *    COMPUTE ACC-BAL = Function Numval-C(BAL-CHAR)
-           COMPUTE ACC-BAL = Function Numval-C("1,234,567.89")
-           MOVE ACC-BAL TO PRT-BAL.
-      *    MOVE 123456789 TO PRT-BAL.
-
-           WRITE PRT-REC-DONE.
-
-           CLOSE PRT-DONE.
+       CLOSE-STOP.
+           CLOSE PRT-OUT.
            CLOSE CUS-RECS.
            STOP RUN.
